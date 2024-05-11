@@ -19,7 +19,7 @@ public class StockController implements StockApi {
 
     @Override
     public ResponseEntity<StockPriceResponse> getStockPrice(String ticker) {
-        StockPriceResponse stockPrice = stockService.getStockPrice(ticker);
+        StockPriceResponse stockPrice = stockService.getCurrentStockPrice(ticker);
         return ResponseEntity.ok(stockPrice);
     }
 
@@ -31,7 +31,7 @@ public class StockController implements StockApi {
 
     @Override
     public ResponseEntity<Sp500StockResponse> getSp500stocks() {
-        Sp500StockResponse sp500stocks = stockService.getSp500Stocks();
+        Sp500StockResponse sp500stocks = stockService.getTopSp500StockPrices();
         return ResponseEntity.ok(sp500stocks);
     }
 }

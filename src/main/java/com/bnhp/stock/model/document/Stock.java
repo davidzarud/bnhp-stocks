@@ -16,19 +16,20 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(value = "stockHistory")
-public class StockHistory {
+@Document(value = "stock")
+public class Stock {
 
-    public static final String STOCK_HISTORY_COLLECTION = "stockHistory";
+    public static final String STOCK_COLLECTION = "stock";
 
     @Id
     private ObjectId id;
-    private ObjectId stockId;
-    private BigDecimal openPrice;
-    private BigDecimal closePrice;
-    private BigDecimal highPrice;
-    private BigDecimal lowPrice;
-    private BigDecimal volume;
+    private String companyName;
+    private String symbol;
+    private String currency;
+    private BigDecimal currentPrice;
+    private BigDecimal yesterdayPrice;
+    private BigDecimal difference;
+    private BigDecimal differencePercent;
 
     @CreatedDate
     private LocalDateTime createDate;

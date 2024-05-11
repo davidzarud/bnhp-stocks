@@ -1,8 +1,11 @@
 package com.bnhp.stock.service;
 
 import com.bnhp.stock.feign.StockFeignClient;
+import com.bnhp.stock.model.document.Stock;
 import com.bnhp.stock.model.document.TopStock;
 import com.bnhp.stock.model.dto.sp500.response.Sp500Response;
+import com.bnhp.stock.model.dto.sp500stock.request.Sp500StockRequest;
+import com.bnhp.stock.model.dto.stockprice.response.StockPriceResponseData;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +19,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static com.bnhp.stock.model.document.TopStock.TOP_STOCK_COLLECTION;
+import static com.bnhp.stock.service.UtilService.getDiff;
+import static com.bnhp.stock.service.UtilService.getDiffPct;
 
 @Slf4j
 @Service
@@ -28,9 +33,10 @@ public class DataService {
     @PostConstruct
     public void initData() {
         reloadTopStocks();
+        reloadTopStocksCurrentPrice();
     }
 
-    @Scheduled(cron = "0 0 2 * * *")
+    @Scheduled(cron = "0 0 6 * * *")
     public void reloadTopStocks() {
 
         LocalDate today = LocalDate.now();
@@ -52,5 +58,41 @@ public class DataService {
             mongoTemplate.createCollection(TOP_STOCK_COLLECTION);
             mongoTemplate.insert(topStocks, TOP_STOCK_COLLECTION);
         }
+    }
+
+    @Scheduled(cron = "0 0 6 * * *")
+    public void reloadTopStocksCurrentPrice() {
+        LocalDate today = LocalDate.now();
+        Query query = new Query();
+        query.addCriteria(
+                Criteria.where("createDate")
+                        .gte(today.atStartOfDay())
+                        .lt(today.plusDays(1).atStartOfDay())
+        );
+        if (!mongoTemplate.exists(query, Stock.class)) {
+            List<String> tickers = mongoTemplate.findAll(TopStock.class)
+                    .stream()
+                    .map(TopStock::getSymbol)
+                    .toList();
+            List<StockPriceResponseData> sp500stockPrices = stockFeignClient.getSp500stockPrices(Sp500StockRequest.builder()
+                    .tickers(tickers)
+                    .build());
+            List<Stock> stocks = sp500stockPrices.stream().map(stockPriceResponseData -> Stock.builder()
+                    .currentPrice(stockPriceResponseData.getCurrentPrice())
+                    .companyName(stockPriceResponseData.getFullCompanyName())
+                    .symbol(stockPriceResponseData.getTicker())
+                    .yesterdayPrice(stockPriceResponseData.getYesterdayPrice())
+                    .currency(stockPriceResponseData.getCurrency())
+                    .difference(getDiff(stockPriceResponseData.getCurrentPrice(), stockPriceResponseData.getYesterdayPrice()))
+                    .differencePercent(getDiffPct(stockPriceResponseData.getCurrentPrice(), stockPriceResponseData.getYesterdayPrice()))
+                    .build()).toList();
+            mongoTemplate.insert(stocks, Stock.STOCK_COLLECTION);
+        }
+    }
+
+    @Scheduled(cron = "0 0 6 * * *")
+    public void updateHistory() {
+
+
     }
 }
