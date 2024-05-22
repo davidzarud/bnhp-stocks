@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class TickerData {
+public class Sp500Response {
 
-    private List<String> tickers;
+    private List<Company> companies;
 }

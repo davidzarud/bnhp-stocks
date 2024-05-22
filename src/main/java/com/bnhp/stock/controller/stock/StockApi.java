@@ -1,4 +1,4 @@
-package com.bnhp.stock.controller;
+package com.bnhp.stock.controller.stock;
 
 import com.bnhp.stock.model.dto.sp500stock.response.Sp500StockResponse;
 import com.bnhp.stock.model.dto.stockprice.response.StockPriceResponse;

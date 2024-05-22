@@ -1,80 +1,80 @@
 package com.bnhp.stock.service;
 
 import com.bnhp.stock.feign.StockFeignClient;
-import com.bnhp.stock.model.dto.sp500.response.TickerData;
-import com.bnhp.stock.model.dto.sp500stock.request.Sp500StockRequest;
+import com.bnhp.stock.model.document.Stock;
+import com.bnhp.stock.model.document.TopStock;
 import com.bnhp.stock.model.dto.sp500stock.response.Sp500StockResponse;
 import com.bnhp.stock.model.dto.stockprice.response.StockPriceResponse;
 import com.bnhp.stock.model.dto.stockprice.response.StockPriceResponseData;
 import com.bnhp.stock.model.transofrmer.StockTransformer;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static com.bnhp.stock.model.transofrmer.StockTransformer.stockDataToStockResponse;
-    import static com.bnhp.stock.service.UtilService.partitionList;
+import static com.bnhp.stock.model.transofrmer.StockTransformer.stockToStockPriceResponse;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class StockService {
 
+    private final MongoTemplate mongoTemplate;
     private final StockFeignClient stockFeignClient;
-    private List<String> sp500Tickers;
-    private Map<String, StockPriceResponseData> sp500Stocks = new ConcurrentHashMap<>();
 
-    public StockPriceResponse getStockPrice(String ticker) {
+    public StockPriceResponse getCurrentStockPriceFromServer(String ticker) {
         StockPriceResponseData stockPrice = stockFeignClient.getStockPrice(ticker);
         return stockDataToStockResponse(stockPrice);
     }
 
+    public StockPriceResponse getCurrentStockPriceFromDB(String ticker) {
+        Criteria criteria = Criteria.where("symbol").is(ticker)
+                .and("createDate")
+                .gte(LocalDate.now().atStartOfDay())
+                .lt(LocalDate.now().plusDays(1).atStartOfDay());
+        Stock stock = mongoTemplate.findOne(Query.query(criteria), Stock.class);
+        return stock != null ? stockToStockPriceResponse(stock) : null;
+    }
+
     public List<String> getSp500Tickers() {
-        if (CollectionUtils.isEmpty(sp500Tickers)) {
-            TickerData tickerData = stockFeignClient.getSp500Tickers();
-            List<String> filteredTickers = tickerData.getTickers().stream().filter(s -> !s.contains(".")).toList();
-            sp500Tickers = new ArrayList<>(filteredTickers);
-        }
-        return sp500Tickers;
+        return mongoTemplate.findAll(TopStock.class)
+                .stream()
+                .map(TopStock::getSymbol).toList();
     }
 
-    public Sp500StockResponse getSp500Stocks() {
-
+    public Sp500StockResponse getTopSp500StockPrices() {
+        LocalDate today = LocalDate.now();
+        Query query = new Query();
+        query.addCriteria(Criteria.where("createDate")
+                .gte(today.atStartOfDay())
+                .lt(today.plusDays(1).atStartOfDay()));
+        List<Stock> stocks = mongoTemplate.find(query, Stock.class);
+        List<StockPriceResponse> stockPriceResponseList = stocks.stream().map(StockTransformer::stockToStockPriceResponse)
+                .toList();
         return Sp500StockResponse.builder()
-                .stockPrices(sp500Stocks.values()
-                        .stream()
-                        .map(StockTransformer::stockDataToStockResponse)
-                        .toList())
+                .stockPrices(stockPriceResponseList)
                 .build();
-
-
-//        Sp500StockRequest sp500StockRequest = Sp500StockRequest.builder()
-//                .tickers(getSp500Tickers().subList(0, 50))
-//                .build();
-//        List<StockPriceResponseData> sp500stockPrices = stockFeignClient.getSp500stockPrices(sp500StockRequest);
-//        return Sp500StockResponse.builder()
-//                .stockPrices(sp500stockPrices
-//                        .stream()
-//                        .map(StockTransformer::stockDataToStockResponse).toList())
-//                .build();
     }
 
-    @PostConstruct
-    public void fetchSp500Data() {
+    public List<String> getMostActiveStocks() {
+        return stockFeignClient.getMostActiveStocks();
+    }
 
-        partitionList(getSp500Tickers(), 50).forEach(partition -> {
-            Sp500StockRequest sp500StockRequest = Sp500StockRequest.builder()
-                    .tickers(partition)
-                    .build();
-            List<StockPriceResponseData> sp500stockPrices = stockFeignClient.getSp500stockPrices(sp500StockRequest);
-            sp500stockPrices.forEach(stock ->
-                    sp500Stocks.put(stock.getTicker(), stock));
-        });
+    public List<Stock> getDailyGainers() {
+
+        Query query = new Query().limit(5).with(Sort.by(Sort.Direction.DESC, "differencePercent"));
+        return mongoTemplate.find(query, Stock.class);
+    }
+
+    public List<Stock> getDailyLosers() {
+        Query query = new Query().limit(5).with(Sort.by(Sort.Direction.ASC, "differencePercent"));
+        return mongoTemplate.find(query, Stock.class);
     }
 }
