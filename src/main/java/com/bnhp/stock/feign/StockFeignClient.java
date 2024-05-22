@@ -1,5 +1,6 @@
 package com.bnhp.stock.feign;
 
+import com.bnhp.stock.model.dto.gemini.GeminiRequest;
 import com.bnhp.stock.model.dto.sp500stock.request.Sp500StockRequest;
 import com.bnhp.stock.model.dto.stockprice.response.StockPriceResponseData;
 import com.bnhp.stock.model.dto.sp500.response.Sp500Response;
@@ -25,4 +26,7 @@ public interface StockFeignClient {
 
     @GetMapping("/most-active")
     List<String> getMostActiveStocks();
+
+    @PostMapping("/gemini")
+    String askGemini(@RequestBody GeminiRequest request);
 }
