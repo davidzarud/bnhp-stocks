@@ -1,4 +1,4 @@
-package com.bnhp.stock.controller;
+package com.bnhp.stock.controller.stock;
 
 import com.bnhp.stock.model.dto.sp500stock.response.Sp500StockResponse;
 import com.bnhp.stock.model.dto.stockprice.response.StockPriceResponse;
@@ -19,7 +19,10 @@ public class StockController implements StockApi {
 
     @Override
     public ResponseEntity<StockPriceResponse> getStockPrice(String ticker) {
-        StockPriceResponse stockPrice = stockService.getCurrentStockPrice(ticker);
+        StockPriceResponse stockPrice = stockService.getCurrentStockPriceFromDB(ticker);
+        if (null == stockPrice) {
+            stockPrice = stockService.getCurrentStockPriceFromServer(ticker);
+        }
         return ResponseEntity.ok(stockPrice);
     }
 

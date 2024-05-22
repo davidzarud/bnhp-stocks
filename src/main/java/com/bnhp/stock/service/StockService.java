@@ -9,6 +9,7 @@ import com.bnhp.stock.model.dto.stockprice.response.StockPriceResponseData;
 import com.bnhp.stock.model.transofrmer.StockTransformer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static com.bnhp.stock.model.transofrmer.StockTransformer.stockDataToStockResponse;
+import static com.bnhp.stock.model.transofrmer.StockTransformer.stockToStockPriceResponse;
 
 @Slf4j
 @Service
@@ -27,9 +29,18 @@ public class StockService {
     private final MongoTemplate mongoTemplate;
     private final StockFeignClient stockFeignClient;
 
-    public StockPriceResponse getCurrentStockPrice(String ticker) {
+    public StockPriceResponse getCurrentStockPriceFromServer(String ticker) {
         StockPriceResponseData stockPrice = stockFeignClient.getStockPrice(ticker);
         return stockDataToStockResponse(stockPrice);
+    }
+
+    public StockPriceResponse getCurrentStockPriceFromDB(String ticker) {
+        Criteria criteria = Criteria.where("symbol").is(ticker)
+                .and("createDate")
+                .gte(LocalDate.now().atStartOfDay())
+                .lt(LocalDate.now().plusDays(1).atStartOfDay());
+        Stock stock = mongoTemplate.findOne(Query.query(criteria), Stock.class);
+        return stock != null ? stockToStockPriceResponse(stock) : null;
     }
 
     public List<String> getSp500Tickers() {
@@ -50,5 +61,20 @@ public class StockService {
         return Sp500StockResponse.builder()
                 .stockPrices(stockPriceResponseList)
                 .build();
+    }
+
+    public List<String> getMostActiveStocks() {
+        return stockFeignClient.getMostActiveStocks();
+    }
+
+    public List<Stock> getDailyGainers() {
+
+        Query query = new Query().limit(5).with(Sort.by(Sort.Direction.DESC, "differencePercent"));
+        return mongoTemplate.find(query, Stock.class);
+    }
+
+    public List<Stock> getDailyLosers() {
+        Query query = new Query().limit(5).with(Sort.by(Sort.Direction.ASC, "differencePercent"));
+        return mongoTemplate.find(query, Stock.class);
     }
 }

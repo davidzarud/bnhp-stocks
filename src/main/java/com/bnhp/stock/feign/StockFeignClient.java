@@ -22,4 +22,7 @@ public interface StockFeignClient {
 
     @PostMapping("/sp500-stock-price")
     List<StockPriceResponseData> getSp500stockPrices(@RequestBody Sp500StockRequest tickers);
+
+    @GetMapping("/most-active")
+    List<String> getMostActiveStocks();
 }

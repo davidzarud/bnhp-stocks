@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -22,8 +21,8 @@ public class StockHistory {
     public static final String STOCK_HISTORY_COLLECTION = "stockHistory";
 
     @Id
-    private ObjectId id;
-    private ObjectId stockId;
+    private String id;
+    private String stockId;
     private BigDecimal openPrice;
     private BigDecimal closePrice;
     private BigDecimal highPrice;

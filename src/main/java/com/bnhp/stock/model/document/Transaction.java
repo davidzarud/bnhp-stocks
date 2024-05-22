@@ -1,7 +1,6 @@
 package com.bnhp.stock.model.document;
 
 import lombok.Data;
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -12,9 +11,9 @@ import java.time.LocalDateTime;
 @Document(value = "transaction")
 public class Transaction {
 
-    private ObjectId id;
-    private ObjectId userId;
-    private ObjectId stockId;
+    private String id;
+    private String userId;
+    private String stockId;
     private String transactionType;
     private Integer quantity;
     private BigDecimal price;

@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -22,7 +21,7 @@ public class Stock {
     public static final String STOCK_COLLECTION = "stock";
 
     @Id
-    private ObjectId id;
+    private String id;
     private String companyName;
     private String symbol;
     private String currency;

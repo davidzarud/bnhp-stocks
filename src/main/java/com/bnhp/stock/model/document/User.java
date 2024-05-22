@@ -1,7 +1,6 @@
 package com.bnhp.stock.model.document;
 
 import lombok.Data;
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -14,10 +13,11 @@ import java.time.LocalDateTime;
 public class User {
 
     @Id
-    private ObjectId id;
+    private String id;
     private String username;
     private String email;
     private String passwordHash;
+    private BigDecimal portfolioBalance;
     private BigDecimal accountBalance;
 
     @CreatedDate
