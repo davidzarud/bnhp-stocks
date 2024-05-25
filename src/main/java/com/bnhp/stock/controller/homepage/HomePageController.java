@@ -2,12 +2,10 @@ package com.bnhp.stock.controller.homepage;
 
 import com.bnhp.stock.model.dto.stockprice.response.StockPriceResponse;
 import com.bnhp.stock.service.HomePageService;
-import com.bnhp.stock.service.StockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -19,7 +17,7 @@ public class HomePageController {
     private final HomePageService homePageService;
 
     @GetMapping("/{userId}/portfolio-balance")
-    public ResponseEntity<BigDecimal> getPortfolioBalance(@PathVariable String userId) {
+    public ResponseEntity<Double> getPortfolioBalance(@PathVariable String userId) {
         return ResponseEntity.ok().body(homePageService.getPortfolioBalance(userId));
     }
 

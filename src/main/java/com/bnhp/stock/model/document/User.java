@@ -5,7 +5,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -17,8 +16,8 @@ public class User {
     private String username;
     private String email;
     private String passwordHash;
-    private BigDecimal portfolioBalance;
-    private BigDecimal accountBalance;
+    private Double portfolioBalance;
+    private Double accountBalance;
 
     @CreatedDate
     private LocalDateTime createDate;
