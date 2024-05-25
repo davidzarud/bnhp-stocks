@@ -11,7 +11,6 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 
@@ -23,7 +22,7 @@ public class HomePageService {
     private final MongoTemplate mongoTemplate;
     private final StockService stockService;
 
-    public BigDecimal getPortfolioBalance(String userId) {
+    public Double getPortfolioBalance(String userId) {
         Criteria criteria = Criteria.where("_id").is(userId);
         Query query = new Query(criteria);
         return Objects.requireNonNull(mongoTemplate.findOne(query, User.class)).getPortfolioBalance();

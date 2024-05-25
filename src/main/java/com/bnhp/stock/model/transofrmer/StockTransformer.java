@@ -14,8 +14,8 @@ public class StockTransformer {
     public static StockPriceResponse stockDataToStockResponse(StockPriceResponseData stockData) {
         return StockPriceResponse.builder()
                 .companyName(stockData.getFullCompanyName())
-                .currentPrice(stockData.getCurrentPrice().setScale(2, RoundingMode.HALF_UP))
-                .yesterdayPrice(stockData.getYesterdayPrice().setScale(2, RoundingMode.HALF_UP))
+                .currentPrice(stockData.getCurrentPrice())
+                .yesterdayPrice(stockData.getYesterdayPrice())
                 .currency(stockData.getCurrency())
                 .diff(getDiff(stockData.getCurrentPrice(), stockData.getYesterdayPrice()))
                 .diffPercent(getDiffPct(stockData.getCurrentPrice(), stockData.getYesterdayPrice()))

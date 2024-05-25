@@ -6,8 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,10 +16,10 @@ public class StockPriceResponseData {
     private String fullCompanyName;
 
     @JsonProperty(value = "current_price")
-    private BigDecimal currentPrice;
+    private Double currentPrice;
 
     @JsonProperty(value = "yesterday_price")
-    private BigDecimal yesterdayPrice;
+    private Double yesterdayPrice;
 
     private String currency;
     private String ticker;

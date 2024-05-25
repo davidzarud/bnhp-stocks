@@ -8,7 +8,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -25,10 +24,10 @@ public class Stock {
     private String companyName;
     private String symbol;
     private String currency;
-    private BigDecimal currentPrice;
-    private BigDecimal yesterdayPrice;
-    private BigDecimal difference;
-    private BigDecimal differencePercent;
+    private Double currentPrice;
+    private Double yesterdayPrice;
+    private Double difference;
+    private Double differencePercent;
 
     @CreatedDate
     private LocalDateTime createDate;
