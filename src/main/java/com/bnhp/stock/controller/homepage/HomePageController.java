@@ -39,5 +39,4 @@ public class HomePageController {
     public ResponseEntity<List<StockPriceResponse>> getDailyLosers() {
         return ResponseEntity.ok().body(homePageService.getDailyLosers());
     }
-
 }
