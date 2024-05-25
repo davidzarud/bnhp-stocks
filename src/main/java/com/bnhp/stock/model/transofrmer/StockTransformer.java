@@ -30,6 +30,7 @@ public class StockTransformer {
                 .yesterdayPrice(stock.getYesterdayPrice())
                 .diff(stock.getDifference())
                 .diffPercent(stock.getDifferencePercent())
+                .ticker(stock.getSymbol())
                 .build();
     }
 }
