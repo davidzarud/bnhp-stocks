@@ -2,6 +2,7 @@ package com.bnhp.stock.service;
 
 import com.bnhp.stock.feign.StockFeignClient;
 import com.bnhp.stock.model.document.Stock;
+import com.bnhp.stock.model.document.StockImage;
 import com.bnhp.stock.model.document.TopStock;
 import com.bnhp.stock.model.dto.sp500stock.response.Sp500StockResponse;
 import com.bnhp.stock.model.dto.stockprice.response.StockPriceResponse;
@@ -31,7 +32,20 @@ public class StockService {
 
     public StockPriceResponse getCurrentStockPriceFromServer(String ticker) {
         StockPriceResponseData stockPrice = stockFeignClient.getStockPrice(ticker);
-        return stockDataToStockResponse(stockPrice);
+        StockImage stockImage = getStockImage(ticker);
+        return stockDataToStockResponse(stockPrice, stockImage);
+    }
+
+    public StockImage getStockImage(String ticker) {
+        Criteria criteria = Criteria.where("symbol").is(ticker);
+        StockImage stockImage = mongoTemplate.findOne(Query.query(criteria), StockImage.class);
+        if (null == stockImage) {
+            return StockImage.builder()
+                    .imgUrl(stockFeignClient.getImageUrl(ticker + " stock").getImageUrl())
+                    .symbol(ticker)
+                    .build();
+        }
+        return stockImage;
     }
 
     public StockPriceResponse getCurrentStockPriceFromDB(String ticker) {
@@ -40,7 +54,8 @@ public class StockService {
                 .gte(LocalDate.now().atStartOfDay())
                 .lt(LocalDate.now().plusDays(1).atStartOfDay());
         Stock stock = mongoTemplate.findOne(Query.query(criteria), Stock.class);
-        return stock != null ? stockToStockPriceResponse(stock) : null;
+        StockImage stockImage = getStockImage(ticker);
+        return stock != null ? stockToStockPriceResponse(stock, stockImage) : null;
     }
 
     public List<String> getSp500Tickers() {
@@ -56,7 +71,12 @@ public class StockService {
                 .gte(today.atStartOfDay())
                 .lt(today.plusDays(1).atStartOfDay()));
         List<Stock> stocks = mongoTemplate.find(query, Stock.class);
-        List<StockPriceResponse> stockPriceResponseList = stocks.stream().map(StockTransformer::stockToStockPriceResponse)
+        List<StockPriceResponse> stockPriceResponseList = stocks
+                .stream()
+                .map(stock -> {
+                    StockImage stockImage = getStockImage(stock.getSymbol());
+                    return stockToStockPriceResponse(stock, stockImage);
+                })
                 .toList();
         return Sp500StockResponse.builder()
                 .stockPrices(stockPriceResponseList)

@@ -1,6 +1,7 @@
 package com.bnhp.stock.feign;
 
 import com.bnhp.stock.model.dto.gemini.GeminiRequest;
+import com.bnhp.stock.model.dto.image.StockImageResponse;
 import com.bnhp.stock.model.dto.sp500stock.request.Sp500StockRequest;
 import com.bnhp.stock.model.dto.stockprice.response.StockPriceResponseData;
 import com.bnhp.stock.model.dto.sp500.response.Sp500Response;
@@ -29,4 +30,7 @@ public interface StockFeignClient {
 
     @PostMapping("/gemini")
     String askGemini(@RequestBody GeminiRequest request);
+
+    @GetMapping("/search-image")
+    StockImageResponse getImageUrl(@RequestParam String query);
 }

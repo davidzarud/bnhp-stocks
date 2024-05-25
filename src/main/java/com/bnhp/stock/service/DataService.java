@@ -2,7 +2,9 @@ package com.bnhp.stock.service;
 
 import com.bnhp.stock.feign.StockFeignClient;
 import com.bnhp.stock.model.document.Stock;
+import com.bnhp.stock.model.document.StockImage;
 import com.bnhp.stock.model.document.TopStock;
+import com.bnhp.stock.model.dto.image.StockImageResponse;
 import com.bnhp.stock.model.dto.sp500.response.Sp500Response;
 import com.bnhp.stock.model.dto.sp500stock.request.Sp500StockRequest;
 import com.bnhp.stock.model.dto.stockprice.response.StockPriceResponseData;
@@ -10,12 +12,14 @@ import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.bnhp.stock.model.document.TopStock.TOP_STOCK_COLLECTION;
@@ -34,6 +38,32 @@ public class DataService {
     public void initData() {
         reloadTopStocks();
         reloadTopStocksCurrentPrice();
+        reloadStockImage();
+    }
+
+    private void reloadStockImage() {
+        LocalDate today = LocalDate.now();
+        Query query = new Query();
+        query.addCriteria(
+                Criteria.where("createDate")
+                        .gte(today.atStartOfDay())
+                        .lt(today.plusDays(1).atStartOfDay())
+        );
+        if (!mongoTemplate.exists(query, StockImage.class)) {
+            mongoTemplate.dropCollection(StockImage.STOCK_IMAGE_COLLECTION);
+            List<Stock> stocks = mongoTemplate.find(query, Stock.class);
+
+            List<StockImage> stockImages = stocks
+                    .stream()
+                    .map(stock -> {
+                        StockImageResponse stockImageResponse = stockFeignClient.getImageUrl(stock.getCompanyName() + " company stock");
+                        return StockImage.builder()
+                                .imgUrl(stockImageResponse.getImageUrl())
+                                .symbol(stock.getSymbol())
+                                .build();
+                    }).toList();
+            mongoTemplate.insertAll(stockImages);
+        }
     }
 
     @Scheduled(cron = "0 0 6 * * *")

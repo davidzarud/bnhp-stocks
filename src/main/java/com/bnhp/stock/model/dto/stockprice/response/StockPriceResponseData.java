@@ -23,4 +23,5 @@ public class StockPriceResponseData {
 
     private String currency;
     private String ticker;
+    private String imgUrl;
 }

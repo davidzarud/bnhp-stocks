@@ -20,4 +20,5 @@ public class StockPriceResponse {
     private Double diffPercent;
     private String ticker;
     private String currency;
+    private String imgUrl;
 }
