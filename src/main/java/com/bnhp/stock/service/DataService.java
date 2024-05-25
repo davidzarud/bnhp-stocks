@@ -56,7 +56,7 @@ public class DataService {
             List<StockImage> stockImages = stocks
                     .stream()
                     .map(stock -> {
-                        StockImageResponse stockImageResponse = stockFeignClient.getImageUrl(stock.getCompanyName() + " company stock");
+                        StockImageResponse stockImageResponse = stockFeignClient.getImageUrl(stock.getCompanyName() + " logo wall street");
                         return StockImage.builder()
                                 .imgUrl(stockImageResponse.getImageUrl())
                                 .symbol(stock.getSymbol())

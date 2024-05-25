@@ -41,7 +41,7 @@ public class StockService {
         StockImage stockImage = mongoTemplate.findOne(Query.query(criteria), StockImage.class);
         if (null == stockImage) {
             return StockImage.builder()
-                    .imgUrl(stockFeignClient.getImageUrl(ticker + " stock").getImageUrl())
+                    .imgUrl(stockFeignClient.getImageUrl(ticker + " company logo").getImageUrl())
                     .symbol(ticker)
                     .build();
         }
