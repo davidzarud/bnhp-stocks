@@ -8,7 +8,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -23,11 +22,11 @@ public class StockHistory {
     @Id
     private String id;
     private String stockId;
-    private BigDecimal openPrice;
-    private BigDecimal closePrice;
-    private BigDecimal highPrice;
-    private BigDecimal lowPrice;
-    private BigDecimal volume;
+    private Double openPrice;
+    private Double closePrice;
+    private Double highPrice;
+    private Double lowPrice;
+    private Double volume;
 
     @CreatedDate
     private LocalDateTime createDate;
