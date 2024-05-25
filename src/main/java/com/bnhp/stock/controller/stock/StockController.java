@@ -5,6 +5,7 @@ import com.bnhp.stock.model.dto.stockprice.response.StockPriceResponse;
 import com.bnhp.stock.service.StockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/stock")
 @RequiredArgsConstructor
+@CrossOrigin
 public class StockController implements StockApi {
 
     private final StockService stockService;
