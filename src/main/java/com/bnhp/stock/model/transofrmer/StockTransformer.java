@@ -19,6 +19,7 @@ public class StockTransformer {
                 .currency(stockData.getCurrency())
                 .diff(getDiff(stockData.getCurrentPrice(), stockData.getYesterdayPrice()))
                 .diffPercent(getDiffPct(stockData.getCurrentPrice(), stockData.getYesterdayPrice()))
+                .ticker(stockData.getTicker())
                 .build();
     }
 
